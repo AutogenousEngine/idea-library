@@ -74,7 +74,13 @@ installed) in [`template.toml`](template.toml).
 
 The Idea Library app (`system/apps/idea-library/`) and its library builder
 (`.agents/skills/build-idea-library/`) are released under the
-[MIT License](system/apps/idea-library/LICENSE). The rest of this repository is
-the Imbue Studio workspace it runs in, which keeps its own terms: see
-[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) and the `LICENSE` file in
-each directory that has one.
+[MIT License](system/apps/idea-library/LICENSE).
+
+The rest of this repository is the Imbue Studio workspace it runs in, copyright
+Imbue, under the
+[Fair Core License 1.0, MIT Future License (FCL-1.0-MIT)](system/apps/system_interface/LICENSE).
+In short: you may use, change and share it for any purpose except a competing
+commercial product or service, and each version becomes MIT-licensed two years
+after Imbue released it. Third-party material in the tree keeps its own
+license: see [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) and the
+`LICENSE` file in each directory that has one.
