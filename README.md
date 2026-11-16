@@ -69,3 +69,12 @@ generic workspace template -- it is this specific project.
 works, what it needs to run, and what to adapt -- with the
 machine-readable half (recipe, requirements, and the environment it needs
 installed) in [`template.toml`](template.toml).
+
+## License
+
+The Idea Library app (`system/apps/idea-library/`) and its library builder
+(`.agents/skills/build-idea-library/`) are released under the
+[MIT License](system/apps/idea-library/LICENSE). The rest of this repository is
+the Imbue Studio workspace it runs in, which keeps its own terms: see
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) and the `LICENSE` file in
+each directory that has one.
