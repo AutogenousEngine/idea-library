@@ -1,0 +1,13 @@
+{
+  "platform": "whisper",
+  "audio": "voice-note-shelf.mp3",
+  "model": "faster-whisper/base.en",
+  "language": "en",
+  "duration_s": 24.1,
+  "status": "automatic transcription",
+  "segments": [
+    {"start": 0.0, "end": 9.8, "text": "Quick note. Write something about how a shared shelf is a kind of infrastructure for trust.", "avg_logprob": -0.21, "no_speech_prob": 0.01},
+    {"start": 9.8, "end": 24.1, "text": "People behave better when they can see that others have behaved well before them. The full shelf is the sign.", "avg_logprob": -0.25, "no_speech_prob": 0.02}
+  ],
+  "text": "Quick note. Write something about how a shared shelf is a kind of infrastructure for trust. People behave better when they can see that others have behaved well before them. The full shelf is the sign."
+}

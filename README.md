@@ -1,54 +1,71 @@
-# Your workspace
+<p align="center">
+  <img alt="Idea Library" src="template.svg" width="480">
+</p>
 
-This folder is your agent's home: everything it knows, everything it builds,
-and the machinery that keeps it running.
+# Idea Library
 
-## Creations
+<p align="center">
+  <a href="https://studio.imbue.com/open?git_url=https://github.com/AutogenousEngine/idea-library"><img alt="Open in Imbue Studio" height="64" src="https://img.shields.io/badge/Open%20in%20Imbue%20Studio-D8D1C0?style=for-the-badge"></a>
+</p>
 
-Broadly, in Imbue Studio you make "creations". These can be "code" (apps, skills, and
-the services behind them) or "data" (documents, images, notes).
+Didn't work? Create a Studio workspace and paste this to your agent:
+` /use-template https://github.com/AutogenousEngine/idea-library`
 
-Imbue Studio makes this easier by defining some conventions for the common things
-you'll want to make:
+## Why you care
 
-1. an "app" - something you can open as a tab and interact with
-2. a "skill" - teaches your agent how to do work you care about. A skill that
-   is automatically run on a schedule is called an "automation": a routine
-   (see `routines/` and the Routines app; the weekly Caretaker is the
-   built-in example)
-3. some "data" - documents, images, notes, or data created by your apps and
-   skills
-4. some "customizations" - changes to any of the above. Everything in Imbue Studio
-   can be modified by you!
+Years of notes, essays and recorded conversations hold the ideas you keep coming
+back to, but they are scattered and you can't see how they connect. Idea Library
+pulls those ideas out in your own words, with every quote checked against what
+you actually said or wrote. You get a library you can read and explore, and
+every claim traces back to its source.
 
-## What's here
+## How to use it
 
-- `apps/` - Everything you can open as a tab: the built-in apps (chat, the
-  terminal, Files, the browser, System Monitor) and the apps your agent builds for you. (A shortcut
-  to `system/apps/`.)
-- `skills/` - Everything your agent knows how to do: the built-in skills and
-  the ones it has learned for you. (A shortcut to `.agents/skills/`.)
-- `routines/` - Everything that runs on a schedule, one file each; the
-  Routines app shows them. (A shortcut to `system/routines/`.)
-- `data/` - Your workspace's data: documents and project folders, files
-  you've uploaded, your agent's memories, and each app's stored data.
-- `docs/` - Guides to this workspace: what it is, how it works, and a history
-  of where it came from.
-- `system/` - The machinery that runs the workspace: the apps themselves,
-  background services, scripts, and configuration. You can look around (every
-  folder has a README), and your agent maintains it for you.
+1. **Build your library.** The app starts empty and says "No library yet" until
+   you do. Ask your agent to "build my idea library". It asks
+   for your name as it appears on recordings, anything to keep private, and
+   where your material is:
+   - files you drop in (markdown, text, HTML, PDF, captions, transcript exports, audio)
+   - a Substack, by name
+   - Plaud or Otter.ai recordings, through each platform's official sign-in
+2. **See the cost first.** Before any model call, it shows an estimate on the
+   default model (`claude-sonnet-5-5`) and asks before a large run. Haiku is
+   offered as a much cheaper option.
+3. **Browse it** in the Idea Library app:
+   - **Reading page**: your ideas in chapters drawn from your material, the
+     threads that connect them, and every source.
+   - **Graph**: every idea and link at once, as a flat graph or a sphere, in light or dark.
+   - **Idea map**: follow a connection to see why it exists. Links you stated are
+     marked apart from suggested ones, and each quote opens its source: the
+     original link, the full transcript, or the audio.
+   - **Classic view**: a searchable list with a shortlist and content-format filters.
+4. **Add more later.** Drop in new files or fetch new recordings and run it
+   again. Only new or changed material reaches the model, and your hand edits
+   are kept.
 
-A few housekeeping files live alongside them:
+The library is plain JSON in `data/.apps/idea-library/`, so you can read it,
+edit it, or check it (`run.py validate`).
 
-- `README.md` - This file.
-- `CLAUDE.md` - The standing instructions your agent follows.
-- `pyproject.toml` and `uv.lock` - The Python project definition; the tooling
-  requires them at the top level.
+## Ideas for making it yours
 
-## Where things are kept safe
+- Add a fetcher for another source you write in, such as a blog's RSS feed,
+  a Notion export, or a folder of journal entries.
+- Run the build as a weekly routine, so new recordings land in the library
+  without you asking.
+- Use each idea's essay seed and suggested formats to draft a Substack note
+  or a short video script straight from the map.
+- Restyle the reading page to match your own site, and publish it as a
+  public "what I think" page.
+- Add a timeline view that shows when each idea first appeared, using the
+  dates your sources already carry.
 
-The workspace is a git repository: code and configuration changes are
-committed as your agent works. Everything under `data/` is deliberately kept
-out of git (it can be large, personal, or both) and is protected by the
-workspace's continuous encrypted backup instead, along with the rest of the
-workspace. See `docs/` for details.
+## What this is
+
+This repository is a published **Imbue Studio template**: a clean, bootable
+snapshot of what an agent built, ready to adapt into your own. It is NOT the
+generic workspace template -- it is this specific project.
+
+[`template.md`](template.md) is the full manifest -- what it is, how it
+works, what it needs to run, and what to adapt -- with the
+machine-readable half (recipe, requirements, and the environment it needs
+installed) in [`template.toml`](template.toml).

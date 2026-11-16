@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "plaud": {
+      "url": "https://mcp.plaud.ai/mcp"
+    },
+    "otter": {
+      "url": "https://mcp.otter.ai/mcp"
+    }
+  }
+}

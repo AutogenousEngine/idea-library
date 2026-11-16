@@ -1,0 +1,81 @@
+# Machine-readable manifest for this template. The sibling
+# template.md holds the prose, the Requirements list, and the two
+# append-only history logs; this file is authoritative for everything
+# below. Both are generated together -- validate_template.py fails if
+# they disagree.
+format = "v2"
+
+[template]
+slug = "idea-library"
+title = "Idea Library"
+description = "Turn your own writing and recordings into a map of your ideas: each idea backed by your own words, sorted into chapters drawn from your material, and connected, shown as a graph, a map and a reading page."
+thumbnail = "template.svg"
+version = "v1"
+
+# How this template is DERIVED from the workspace it came from. An
+# update re-runs this recipe rather than diffing two repos, which is what
+# keeps an exclusion excluded even though the thing still exists upstream.
+[recipe]
+include = ["system/apps/idea-library/", "system/supervisord.conf.d/idea-library.conf", ".agents/skills/build-idea-library/"]
+data_include = []
+# Deliberate exclusions, as paths. The publisher's own library and working
+# store are personal data and never ship; the root mcp-servers.json (the
+# workspace's shared connector list) carries the publisher's own Plaud entry,
+# and the skill carries its own connector copies in assets/mcp-servers.json.
+exclude = [
+    "data/.apps/idea-library/",
+    "data/.skills/build-idea-library/",
+    "data/idea-library-sources/",
+    "mcp-servers.json",
+]
+# No published-version modifications were requested.
+modification_rules = []
+
+# Everything an adopter must deal with before this is really theirs.
+# One list -- but each entry's KIND says how it is handled, because the
+# two are handled at different times by different mechanisms:
+#
+#   permission / secret / llm = ACTIVATION. The adopting agent acts on
+#   these FIRST and BY ITSELF, initiating each latchkey permission
+#   request and each secret request before asking the user anything.
+#   Every one of them must have a matching requires_ line in template.md
+#   and vice versa -- the validator checks that, because an adopter once
+#   never got prompted for a permission the app needed.
+#
+#   The [[requirements.secret]] entries below were AGGREGATED from the
+#   included apps' app.toml [[secrets]] and skills' SKILL.md secrets:
+#   declarations, plus every data/.secrets/<file>.env the included
+#   mcp-servers.json and supervisord programs run under. Fix a wrong one
+#   at its declaration, not here.
+#
+#   adaptation = worked through INTERACTIVELY with the user afterwards.
+#   Prose on both sides, so it is not cross-checked.
+#
+[requirements]
+
+[requirements.llm]
+method = "keyless"
+note = "The skill's model steps run headless claude -p on the workspace's Claude sign-in when there is no API key; with ANTHROPIC_API_KEY configured they call litellm directly instead, so either method works with no code change. Default model claude-sonnet-5-5; the skill shows a cost estimate before spending."
+
+[[requirements.adaptation]]
+summary = "no library ships: every page says \"No library yet\" and asks the user to have their agent build it, until the build-idea-library skill has run"
+resolution = "ask the user for their speaker name, what to keep private and where their material is, run the skill (showing the cost estimate first), then open the app on their own ideas"
+
+[[requirements.adaptation]]
+summary = "optional: Plaud or Otter.ai recordings need a one-time sign-in to the platform's official connector"
+resolution = "if the user records on Plaud or Otter.ai, connect it through connect-external-service's official-connector route using the skill's assets/mcp-servers.json; otherwise export transcripts or audio into data/idea-library-sources/. The Otter.ai fetcher was tested only against made-up results, so check its first real run"
+
+[[requirements.adaptation]]
+summary = "local transcription of real audio has not been exercised"
+resolution = "on the first batch of audio without transcripts, check that the transcribe step (faster-whisper on CPU, model downloaded on first use) produces sensible transcripts"
+
+# What the included code needs INSTALLED. apt takes bare names: versions
+# are a function of the apt snapshot timestamp, so replaying names at the
+# adopter's timestamp yields versions consistent with the rest of their
+# environment. The other sources are not snapshot-pinned, so for them the
+# recorded version IS the pin (name = version).
+#
+# poppler-utils provides pdftotext, which the skill uses to read PDF sources.
+[environment]
+apt = ["poppler-utils"]
+env_d_units = []

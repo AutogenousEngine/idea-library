@@ -1,0 +1,176 @@
+{
+ "title": "Test library",
+ "scope": "A small test collection of four ideas.",
+ "disclaimer": "Test disclaimer footer.",
+ "coverage": {},
+ "nodes": [
+  {
+   "id": "tides-return",
+   "title": "Tides always return",
+   "summary": "What leaves comes back in its own time.",
+   "group": "Support & belonging",
+   "x": 200,
+   "y": 200,
+   "writing_seed": "An essay about patience with tides.",
+   "evidence": [
+    {
+     "source_id": "essay-tides",
+     "quote": "The tide comes back every evening."
+    }
+   ]
+  },
+  {
+   "id": "lantern-light",
+   "title": "A lantern lights one step",
+   "summary": "You only need to see the next step.",
+   "group": "Awareness & inquiry",
+   "x": 600,
+   "y": 260,
+   "evidence": [
+    {
+     "source_id": "voice-lantern",
+     "quote": "A lantern only shows the next step.",
+     "timestamp": "00:42"
+    }
+   ]
+  },
+  {
+   "id": "orchard-seasons",
+   "title": "Orchards keep seasons",
+   "summary": "Growth follows a calendar older than plans.",
+   "group": "Awareness & inquiry",
+   "x": 900,
+   "y": 520,
+   "evidence": [
+    {
+     "source_id": "plaud-orchard",
+     "quote": "The orchard does not hurry."
+    }
+   ]
+  },
+  {
+   "id": "recovery",
+   "title": "Recovery is a practice",
+   "summary": "Returning is the practice itself.",
+   "group": "Rest & renewal",
+   "x": 400,
+   "y": 600,
+   "evidence": [
+    {
+     "source_id": "essay-tides",
+     "quote": "Each return is practice."
+    }
+   ]
+  },
+  {
+   "id": "rest-signal",
+   "title": "Tiredness is a signal",
+   "summary": "Tiredness points at an unmet need.",
+   "writing_seed": null,
+   "evidence": [
+    {
+     "source_id": "plaud-orchard",
+     "quote": "The wanting tells you something."
+    }
+   ],
+   "group": "Rest & renewal",
+   "x": 2440,
+   "y": 150
+  },
+  {
+   "id": "habit-loop",
+   "title": "Habits loop back",
+   "summary": "Every habit has a cue and a reward.",
+   "writing_seed": "A piece on noticing the cue.",
+   "evidence": [
+    {
+     "source_id": "essay-tides",
+     "quote": "The loop closes on its own."
+    }
+   ],
+   "group": "Rest & renewal",
+   "x": 2440,
+   "y": 285
+  }
+ ],
+ "edges": [
+  {
+   "id": "e1",
+   "source": "tides-return",
+   "target": "lantern-light",
+   "label": "leads to",
+   "basis": "expressed",
+   "why": "Both are about trusting what comes next.",
+   "evidence": [
+    {
+     "source_id": "essay-tides",
+     "quote": "The tide comes back every evening."
+    }
+   ]
+  },
+  {
+   "id": "e2",
+   "source": "lantern-light",
+   "target": "orchard-seasons",
+   "label": "may help explain",
+   "basis": "suggested",
+   "why": "Seeing one step fits growing one season at a time.",
+   "evidence": []
+  },
+  {
+   "id": "e3",
+   "evidence": [],
+   "source": "rest-signal",
+   "target": "habit-loop",
+   "label": "feeds",
+   "basis": "expressed",
+   "why": "A signal starts the loop."
+  }
+ ],
+ "sources": [
+  {
+   "id": "essay-tides",
+   "title": "Notes on Tides",
+   "kind": "Substack article",
+   "url": "https://example.com/p/notes-on-tides",
+   "raw": "Full saved text of Notes on Tides. The tide comes back every evening.",
+   "audio": null,
+   "transcript": null
+  },
+  {
+   "id": "voice-lantern",
+   "title": "Voice note: the lantern",
+   "kind": "Recovered voice note",
+   "url": "https://example.com/recordings/lantern",
+   "raw": "Recovered voice note text about a lantern.",
+   "audio": "map-assets/lantern.mp3",
+   "transcript": null,
+   "transcription_note": "Transcribed automatically."
+  },
+  {
+   "id": "plaud-orchard",
+   "title": "Recording: orchard walk",
+   "kind": "Plaud recording",
+   "url": "https://example.com/recordings/orchard",
+   "raw": "Speech labelled as the speaker about an orchard.",
+   "audio": null,
+   "transcript": "map-assets/transcripts/orchard.txt",
+   "transcription_note": "Transcribed automatically.",
+   "conversation_family": "Garden conversations"
+  }
+ ],
+ "chapters": [
+  {
+   "name": "Support & belonging",
+   "subtitle": ""
+  },
+  {
+   "name": "Awareness & inquiry",
+   "subtitle": ""
+  },
+  {
+   "name": "Rest & renewal",
+   "subtitle": "what restores us"
+  }
+ ]
+}

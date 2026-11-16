@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Idea Library · Graph</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#f7f5ef;--bg2:#f1eee4;--ink:#201f1c;--muted:#8c8577;--rule:#dbd6c7;--garnet:#7b2d3a;--edge:#6d6a5e;--panel:#fbfaf6;--top:56px}
+body.dark{--bg:#14161a;--bg2:#1b1e24;--ink:#ece6dd;--muted:#8d95a0;--rule:#2b3038;--garnet:#e29aa6;--edge:#9aa3ad;--panel:#191c21}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Newsreader,Georgia,serif;overflow:hidden}
+.topbar{position:relative;z-index:6;height:var(--top);display:flex;align-items:center;gap:16px;padding:0 24px;background:var(--bg);border-bottom:1px solid var(--rule)}
+.brand{font:600 17px Fraunces,serif;white-space:nowrap}
+.tl,.btn{font:500 11px "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-decoration:none;white-space:nowrap;background:none;border:1px solid transparent;padding:6px 8px;cursor:pointer;border-radius:3px}
+.tl:hover,.btn:hover{color:var(--garnet)}.btn.on{color:var(--garnet);border-color:var(--garnet)}
+.search{margin-left:auto;display:flex;gap:8px;align-items:center}.search input{width:220px;border:1px solid var(--rule);background:var(--bg2);color:var(--ink);padding:7px 10px;font:15px Newsreader,serif;border-radius:3px}
+.stage{position:absolute;left:0;right:0;top:var(--top);bottom:0}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}canvas.drag{cursor:grabbing}
+.legend{position:absolute;left:20px;bottom:18px;display:flex;flex-wrap:wrap;gap:6px 8px;max-width:calc(100% - 40px - var(--panelw,0px))}
+.chip{display:flex;align-items:center;gap:7px;font:500 10.5px "IBM Plex Mono",monospace;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);background:color-mix(in srgb,var(--panel) 85%,transparent);border:1px solid var(--rule);padding:5px 9px;border-radius:99px;cursor:pointer;user-select:none}
+.chip i{width:10px;height:10px;border-radius:50%;display:block}.chip.off{opacity:.35}
+.hud{position:absolute;left:20px;top:16px;font:11px/1.6 "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);pointer-events:none}
+.hud b{color:var(--ink);font-weight:500}
+.zoom{position:absolute;right:20px;bottom:18px;display:flex;flex-direction:column;gap:6px}.zoom .btn{border-color:var(--rule);background:var(--panel);width:34px;padding:6px 0;text-align:center;font-size:14px}
+.panel{position:absolute;right:0;top:0;bottom:0;width:380px;max-width:92vw;background:var(--panel);border-left:1px solid var(--rule);padding:26px 26px 40px;overflow:auto;transform:translateX(100%);transition:transform .2s ease;z-index:4}
+.panel.open{transform:none}.panel h2{font:500 24px/1.2 Fraunces,serif;margin:6px 0 10px}.panel .kick{font:500 10.5px "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase}
+.panel h4{margin:20px 0 6px;font:500 10.5px "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.panel .q{margin:8px 0;padding:4px 0 4px 14px;border-left:3px solid var(--rule);font-style:italic;font-size:15.5px}.panel .q cite{display:block;font:normal 13px Newsreader,serif;color:var(--muted)}
+.panel ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:15px}.panel a{color:var(--garnet)}
+.panel .close{position:absolute;right:14px;top:12px}.panel .hint{font:11px "IBM Plex Mono",monospace;color:var(--muted)}
+.empty{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:var(--muted);font-style:italic}
+@media(max-width:700px){.search input{width:120px}.tl.hide-s{display:none}.panel{width:100%}}
+</style></head><body>
+<div class="topbar"><div class="brand">Idea Library</div><a class="tl" href="textbook.html">Reading view</a><a class="tl" href="map.html">Idea map</a><button class="btn" id="sphere" title="Wrap the graph onto a spinning globe">Sphere</button><button class="btn" id="theme" title="Light or dark">Dark</button>
+<div class="search"><input id="q" type="search" placeholder="Find an idea…" aria-label="Find an idea"><button class="btn" id="clear" hidden>Clear</button></div></div>
+<div class="stage" id="stage"><canvas id="cv" aria-label="Graph of ideas and their connections"></canvas><div class="hud" id="hud"></div><div class="legend" id="legend"></div>
+<div class="zoom"><button class="btn" id="zin" aria-label="Zoom in">+</button><button class="btn" id="zout" aria-label="Zoom out">−</button><button class="btn" id="fit" aria-label="Fit to screen">Fit</button></div>
+<aside class="panel" id="panel" aria-label="Idea details"></aside><div class="empty" id="empty">The library could not load. Refresh to try again.</div></div>
+<script>
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PALETTE=[[110,150,96],[196,146,92],[84,150,132],[134,112,178],[188,168,60],[190,86,108],[80,140,180]];const hueRgb=(i)=>{const h=(i*137.508)%360/60,c=.42,x=c*(1-Math.abs(h%2-1)),m=.38,[r,g,b]=h<1?[c,x,0]:h<2?[x,c,0]:h<3?[0,c,x]:h<4?[0,x,c]:h<5?[x,0,c]:[c,0,x];return[r,g,b].map(v=>Math.round((v+m)*255))};const chapterOrder=d=>{const o=(d.chapters||[]).map(c=>c.name);d.nodes.forEach(n=>{if(!o.includes(n.group))o.push(n.group)});return o};let CHAPTERS=[];
+const colOf=g=>{const i=CHAPTERS.indexOf(g);return i<0?[120,120,120]:PALETTE[i]||hueRgb(i)};
+const cv=$('cv'),ctx=cv.getContext('2d');let W=0,H=0,DPR=window.devicePixelRatio||1;
+let nodes=[],edges=[],byId=new Map(),adj=new Map(),D=null,srcById={};
+let cam={x:0,y:0,z:1},sphere=localStorage.getItem('idea.graph.sphere')==='1',dark=localStorage.getItem('idea.graph.dark')==='1';
+let hover=null,sel=null,query='',hidden=new Set(),drag=null,pan=null,yaw=0,pitch=-.25,alpha=1,pulses=[],t0=performance.now(),reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function setTheme(){document.body.classList.toggle('dark',dark);$('theme').textContent=dark?'Light':'Dark';$('theme').classList.toggle('on',dark)}
+function resize(){const r=$('stage').getBoundingClientRect();W=r.width;H=r.height;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}
+addEventListener('resize',()=>{resize();fit()});
+Promise.all([fetch('map-data.json').then(r=>{if(!r.ok)throw Error(r.status);return r.json()})]).then(([d])=>{
+ D=d;CHAPTERS=chapterOrder(d);d.sources.forEach(s=>srcById[s.id]=s);build();resize();setTheme();$('sphere').classList.toggle('on',sphere);fit();requestAnimationFrame(loop);const h=decodeURIComponent(location.hash.slice(1));if(h&&byId.has(h))select(h)}).catch(e=>{if(e&&e.message==='404')$('empty').textContent='No library yet. Ask your agent to build your Idea Library from your writing and recordings.';$('empty').style.display='flex'});
+function build(){const groups=[...new Set(D.nodes.map(n=>n.group))];nodes=D.nodes.map((n,i)=>{const gi=groups.indexOf(n.group);return{id:n.id,title:n.title,summary:n.summary,group:n.group,gi,raw:n,x:0,y:0,vx:0,vy:0,deg:0,pin:false,X:0,Y:0,Z:0,vis:1}});
+ nodes.forEach(n=>{byId.set(n.id,n);adj.set(n.id,new Set())});edges=D.edges.filter(e=>byId.has(e.source)&&byId.has(e.target)).map(e=>({...e,s:byId.get(e.source),t:byId.get(e.target)}));
+ edges.forEach(e=>{e.s.deg++;e.t.deg++;adj.get(e.s.id).add(e.t.id);adj.get(e.t.id).add(e.s.id)});
+ const maxDeg=Math.max(1,...nodes.map(n=>n.deg));nodes.forEach(n=>{n.r=5+9*Math.sqrt(n.deg/maxDeg);n.dn=n.deg/maxDeg;const a=Math.random()*6.283,R=260*(.25+.75*(1-n.dn));n.x=Math.cos(a)*R;n.y=Math.sin(a)*R;
+  const u=Math.random()*2-1,th=Math.random()*6.283,rr=Math.sqrt(1-u*u);n.X=rr*Math.cos(th)*200;n.Y=u*200;n.Z=rr*Math.sin(th)*200});
+ $('legend').innerHTML=groups.map(g=>{const c=colOf(g);return `<span class="chip" data-g="${esc(g)}"><i style="background:rgb(${c})"></i>${esc(g)}</span>`}).join('');
+ document.querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{const g=ch.dataset.g;hidden.has(g)?hidden.delete(g):hidden.add(g);ch.classList.toggle('off',hidden.has(g));wake()});
+ for(let i=0;i<Math.min(18,edges.length);i++)pulses.push(newPulse())}
+function newPulse(){return{e:edges[Math.floor(Math.random()*edges.length)],p:Math.random(),v:.0025+Math.random()*.004}}
+const ringOf=n=>Math.min(W,H)*(.08+.34*(1-n.dn));
+function wake(){alpha=Math.max(alpha,.6)}
+/* 2D force layout: repulsion, spring along each connection, pull towards a ring set by how connected the idea is,
+   and a gentle pull of each chapter towards its own side so the chapters read as regions. */
+function stepForces(){if(alpha<.003)return;const n=nodes.length;const gN=Math.max(1,new Set(nodes.map(x=>x.gi)).size);
+ for(let i=0;i<n;i++){const a=nodes[i];if(!a.vis)continue;for(let j=i+1;j<n;j++){const b=nodes[j];if(!b.vis)continue;let dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy+.01;if(d2>160000)continue;const f=900/d2,d=Math.sqrt(d2);dx/=d;dy/=d;a.vx+=dx*f;a.vy+=dy*f;b.vx-=dx*f;b.vy-=dy*f;
+   const m=a.r+b.r+6;if(d<m){const k=(m-d)*.06;a.vx+=dx*k;a.vy+=dy*k;b.vx-=dx*k;b.vy-=dy*k}}}
+ edges.forEach(e=>{if(!e.s.vis||!e.t.vis)return;const dx=e.t.x-e.s.x,dy=e.t.y-e.s.y,d=Math.sqrt(dx*dx+dy*dy)||1,k=(d-95)*.012;const fx=dx/d*k,fy=dy/d*k;e.s.vx+=fx;e.s.vy+=fy;e.t.vx-=fx;e.t.vy-=fy});
+ const cx={},cy={},cn={};nodes.forEach(a=>{if(!a.vis)return;cx[a.gi]=(cx[a.gi]||0)+a.x;cy[a.gi]=(cy[a.gi]||0)+a.y;cn[a.gi]=(cn[a.gi]||0)+1});
+ nodes.forEach(a=>{const d=Math.sqrt(a.x*a.x+a.y*a.y)||1,tr=ringOf(a),k=(tr-d)*.008;a.vx+=a.x/d*k;a.vy+=a.y/d*k;const ang=a.gi/gN*6.283,R=Math.min(W,H)*.3,gx=Math.cos(ang)*R,gy=Math.sin(ang)*R;a.vx+=(gx-a.x)*.014;a.vy+=(gy-a.y)*.014;if(cn[a.gi]>1){a.vx+=(cx[a.gi]/cn[a.gi]-a.x)*.012;a.vy+=(cy[a.gi]/cn[a.gi]-a.y)*.012}});
+ nodes.forEach(a=>{if(a.pin||a===drag?.n){a.vx=a.vy=0;return}a.vx*=.72;a.vy*=.72;a.x+=a.vx*alpha;a.y+=a.vy*alpha});alpha*=.992}
+/* Sphere: each idea sits on a globe, chapters in their own longitude band, connected ideas towards the front; the globe spins. */
+function sphereTargets(){const gN=Math.max(1,new Set(nodes.map(x=>x.gi)).size);const per={};nodes.forEach(n=>{(per[n.gi]=per[n.gi]||[]).push(n)});
+ Object.values(per).forEach(list=>{list.sort((a,b)=>b.deg-a.deg);list.forEach((n,k)=>{const band=6.283/gN,lon=n.gi*band+(((k*2.399963)%1)-.5)*band*.85,lat=(((k+.5)/list.length)*2-1)*1.15;n.TX=Math.cos(lat)*Math.cos(lon);n.TY=Math.sin(lat);n.TZ=Math.cos(lat)*Math.sin(lon)})})}
+function stepSphere(){if(nodes[0]&&nodes[0].TX===undefined)sphereTargets();const R=Math.min(W,H)*.36;nodes.forEach(n=>{n.X+=(n.TX*R-n.X)*.06;n.Y+=(n.TY*R-n.Y)*.06;n.Z+=(n.TZ*R-n.Z)*.06})}
+function project(){const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch),F=1100;nodes.forEach(n=>{const x1=n.X*cy+n.Z*sy,z1=-n.X*sy+n.Z*cy,y2=n.Y*cp-z1*sp,z2=n.Y*sp+z1*cp,s=F/(F+z2);n.sx=x1*s;n.sy=y2*s;n.depth=Math.max(.25,Math.min(1,(z2+Math.min(W,H)*.4)/(Math.min(W,H)*.8)));n.sc=s})}
+let autoFit=true;
+function fit(soft){autoFit=true;const vs=nodes.filter(n=>n.vis);if(!vs.length)return;if(sphere){cam={x:0,y:0,z:1};return}let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;vs.forEach(n=>{x0=Math.min(x0,n.x);x1=Math.max(x1,n.x);y0=Math.min(y0,n.y);y1=Math.max(y1,n.y)});
+ const w=Math.max(200,x1-x0)+200,h=Math.max(200,y1-y0)+200,z=Math.min(W/w,H/h,1.6),cx=(x0+x1)/2,cy=(y0+y1)/2,k=soft===true?.08:1;cam.z+=(z-cam.z)*k;cam.x+=(cx-cam.x)*k;cam.y+=(cy-cam.y)*k}
+const P=n=>sphere?[n.sx*cam.z+W/2,n.sy*cam.z+H/2]:[(n.x-cam.x)*cam.z+W/2,(n.y-cam.y)*cam.z+H/2];
+const matches=n=>!query||(n.title+' '+n.summary+' '+n.group).toLowerCase().includes(query);
+const lit=n=>{const f=hover||sel;return !f||n.id===f||adj.get(f).has(n.id)};
+function rgba(c,a){return `rgba(${c[0]},${c[1]},${c[2]},${a})`}
+function draw(t){ctx.clearRect(0,0,W,H);const ec=dark?[154,163,173]:[109,106,94];const f=hover||sel;
+ nodes.forEach(n=>n.vis=hidden.has(n.group)?0:1);
+ if(sphere){const R=Math.min(W,H)*.36*cam.z;const g=ctx.createRadialGradient(W/2,H/2,R*.2,W/2,H/2,R*1.05);g.addColorStop(0,dark?'rgba(255,255,255,.04)':'rgba(0,0,0,.02)');g.addColorStop(1,dark?'rgba(255,255,255,.0)':'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(W/2,H/2,R*1.05,0,6.283);ctx.fill();ctx.strokeStyle=rgba(ec,.18);ctx.lineWidth=1;ctx.beginPath();ctx.arc(W/2,H/2,R*1.0,0,6.283);ctx.stroke()}
+ /* connections: curved arcs, dashed when only suggested */
+ edges.forEach(e=>{if(!e.s.vis||!e.t.vis)return;const [ax,ay]=P(e.s),[bx,by]=P(e.t);const on=f&&(e.s.id===f||e.t.id===f);const dim=f&&!on;const d=sphere?Math.min(e.s.depth,e.t.depth):1;
+  ctx.strokeStyle=on?rgba(colOf(e.s.group),.9):rgba(ec,(dim?.05:.2)*d);ctx.lineWidth=on?1.8:1;ctx.setLineDash(e.basis==='suggested'?[4,4]:[]);
+  const mx=(ax+bx)/2,my=(ay+by)/2,dx=bx-ax,dy=by-ay,c=.14;ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(mx-dy*c,my+dx*c,bx,by);ctx.stroke()});ctx.setLineDash([]);
+ /* pulses travelling along connections */
+ if(!reduce)pulses.forEach(p=>{const e=p.e;if(!e.s.vis||!e.t.vis)return;const [ax,ay]=P(e.s),[bx,by]=P(e.t),dx=bx-ax,dy=by-ay,mx=(ax+bx)/2-dy*.14,my=(ay+by)/2+dx*.14,u=p.p,x=(1-u)*(1-u)*ax+2*(1-u)*u*mx+u*u*bx,y=(1-u)*(1-u)*ay+2*(1-u)*u*my+u*u*by;const c=colOf(e.s.group);
+  const gl=ctx.createRadialGradient(x,y,0,x,y,8);gl.addColorStop(0,rgba(c,.9));gl.addColorStop(1,rgba(c,0));ctx.fillStyle=gl;ctx.fillRect(x-8,y-8,16,16);p.p+=p.v;if(p.p>1){Object.assign(p,newPulse());p.p=0}});
+ /* ideas: soft halo + disc; far side of the globe is dimmer and smaller */
+ const order=[...nodes].filter(n=>n.vis).sort((a,b)=>sphere?(a.depth-b.depth):(a.deg-b.deg));
+ order.forEach(n=>{const [x,y]=P(n),c=colOf(n.group),L=lit(n),m=matches(n),d=sphere?n.depth:1,sc=sphere?n.sc:1;const r=n.r*cam.z*(sphere?sc:1)*(n===hover||n.id===sel?1.25:1);n.px=x;n.py=y;n.pr=Math.max(r,4);
+  const a=(L&&m?1:.14)*d;const halo=ctx.createRadialGradient(x,y,r*.4,x,y,r*3);halo.addColorStop(0,rgba(c,.38*a));halo.addColorStop(1,rgba(c,0));ctx.fillStyle=halo;ctx.beginPath();ctx.arc(x,y,r*3,0,6.283);ctx.fill();
+  ctx.fillStyle=rgba(c,.92*a);ctx.beginPath();ctx.arc(x,y,r,0,6.283);ctx.fill();ctx.lineWidth=n.id===sel?2.5:1;ctx.strokeStyle=n.id===sel||n===hover?(dark?'#fff':'#201f1c'):rgba(c,a);ctx.stroke();
+  if(n.pin){ctx.fillStyle=dark?'#fff':'#201f1c';ctx.beginPath();ctx.arc(x,y,2,0,6.283);ctx.fill()}});
+ /* labels: hubs, the focused idea and its neighbours, and search hits */
+ ctx.font='500 12px Newsreader, Georgia, serif';ctx.textAlign='center';const hubCut=[...nodes].sort((a,b)=>b.deg-a.deg)[Math.min(7,nodes.length-1)]?.deg||0;
+ order.forEach(n=>{if(!(n.deg>=hubCut&&!f||n===hover||n.id===sel||(f&&adj.get(f).has(n.id))||(query&&matches(n))))return;if(sphere&&(n.depth<.55||!(n===hover||n.id===sel||(f&&adj.get(f).has(n.id))||(query&&matches(n)))))return;const [x,y]=[n.px,n.py];const txt=n.title.length>30?n.title.slice(0,29)+'…':n.title;const w=ctx.measureText(txt).width;
+  ctx.fillStyle=dark?'rgba(20,22,26,.78)':'rgba(247,245,239,.85)';ctx.fillRect(x-w/2-4,y+n.pr+3,w+8,17);ctx.fillStyle=dark?'#ece6dd':'#201f1c';ctx.fillText(txt,x,y+n.pr+16)});
+ $('hud').innerHTML=`<b>${nodes.filter(n=>n.vis).length}</b> ideas · <b>${edges.filter(e=>e.s.vis&&e.t.vis).length}</b> connections${sphere?' · sphere':''}`}
+function loop(t){try{if(sphere){stepSphere();if(!drag&&!reduce)yaw+=.0022;project()}else{stepForces();if(autoFit&&!drag&&!pan)fit(true)}draw(t)}catch(e){console.error(e)}requestAnimationFrame(loop)}
+function at(mx,my){let best=null,bd=1e9;nodes.forEach(n=>{if(!n.vis||n.px===undefined)return;const d=Math.hypot(n.px-mx,n.py-my);if(d<=Math.max(n.pr+5,12)&&d<bd){bd=d;best=n}});return best}
+const rel=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);const[mx,my]=rel(e),n=at(mx,my);if(n&&!sphere)drag={n,moved:false,sx:mx,sy:my};else if(n)drag={n,moved:false,sx:mx,sy:my,sph:true};else pan={x:mx,y:my,cx:cam.x,cy:cam.y,yaw,moved:false}});
+cv.addEventListener('pointermove',e=>{const[mx,my]=rel(e);if(drag){if(Math.hypot(mx-drag.sx,my-drag.sy)>4)drag.moved=true;if(drag.moved&&!drag.sph){drag.n.x=(mx-W/2)/cam.z+cam.x;drag.n.y=(my-H/2)/cam.z+cam.y;drag.n.pin=true;autoFit=false;wake()}}
+ else if(pan){const dx=mx-pan.x,dy=my-pan.y;if(Math.hypot(dx,dy)>3){pan.moved=true;autoFit=false;cv.classList.add('drag')}if(sphere){yaw=pan.yaw+dx*.006}else{cam.x=pan.cx-dx/cam.z;cam.y=pan.cy-dy/cam.z}}
+ else{const n=at(mx,my);hover=n?n.id:null;cv.style.cursor=n?'pointer':'grab'}});
+cv.addEventListener('pointerup',e=>{cv.classList.remove('drag');if(drag){if(!drag.moved)select(drag.n.id);drag=null}else if(pan){if(!pan.moved)select(null);pan=null}});
+cv.addEventListener('dblclick',e=>{const[mx,my]=rel(e),n=at(mx,my);if(n&&n.pin){n.pin=false;wake()}});
+cv.addEventListener('wheel',e=>{e.preventDefault();autoFit=false;const k=Math.exp(-e.deltaY*.0012);cam.z=Math.max(.2,Math.min(4,cam.z*k))},{passive:false});
+$('zin').onclick=()=>{autoFit=false;cam.z=Math.min(4,cam.z*1.25)};$('zout').onclick=()=>{autoFit=false;cam.z=Math.max(.2,cam.z/1.25)};$('fit').onclick=()=>{nodes.forEach(n=>n.pin=false);wake();fit()};
+$('sphere').onclick=()=>{sphere=!sphere;localStorage.setItem('idea.graph.sphere',sphere?'1':'0');$('sphere').classList.toggle('on',sphere);if(!sphere)wake();fit()};
+$('theme').onclick=()=>{dark=!dark;localStorage.setItem('idea.graph.dark',dark?'1':'0');setTheme()};
+$('q').oninput=()=>{query=$('q').value.trim().toLowerCase();$('clear').hidden=!query;const hits=nodes.filter(matches);if(query&&hits.length===1)select(hits[0].id)};
+$('clear').onclick=()=>{$('q').value='';query='';$('clear').hidden=true};
+addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement!==$('q')){e.preventDefault();$('q').focus()}else if(e.key==='Escape'){if(query){$('clear').click()}else if(sel)select(null);$('q').blur()}});
+function select(id){sel=id;const p=$('panel');if(!id){p.classList.remove('open');document.documentElement.style.setProperty('--panelw','0px');history.replaceState(null,'',location.pathname);return}
+ const n=byId.get(id),r=n.raw,c=colOf(n.group);
+ const ev=(r.evidence||[]).map(x=>{const s=srcById[x.source_id];return `<div class="q">“${esc(x.quote)}”<cite>${s?`<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`:esc(x.source_id)}</cite></div>`}).join('');
+ const cs=edges.filter(e=>e.s===n||e.t===n).map(e=>{const o=e.s===n?e.t:e.s,a=`<a href="#${esc(o.id)}" data-go="${esc(o.id)}">${esc(o.title)}</a>`;return `<li>${e.s===n?`This ${esc(e.label)} ${a}`:`${a} ${esc(e.label)} this`}${e.basis==='suggested'?' <span class="hint">suggested</span>':''}</li>`}).join('');
+ p.innerHTML=`<button class="btn close" id="pclose" aria-label="Close">Close</button><div class="kick" style="color:rgb(${c})">${esc(n.group)}</div><h2>${esc(n.title)}</h2><p>${esc(n.summary)}</p>${ev?`<h4>In their words</h4>${ev}`:''}${cs?`<h4>Connected to</h4><ul>${cs}</ul>`:''}<h4>Open</h4><ul><li><a href="textbook.html#${esc(n.id)}">Read it in the reading view</a></li><li><a href="map.html#${esc(n.id)}">Find it on the idea map</a></li></ul><p class="hint">Drag an idea to pin it. Double-click to let it go.</p>`;
+ p.classList.add('open');p.scrollTop=0;document.documentElement.style.setProperty('--panelw','380px');history.replaceState(null,'','#'+id);
+ $('pclose').onclick=()=>select(null);p.querySelectorAll('[data-go]').forEach(a=>a.onclick=ev=>{ev.preventDefault();select(a.dataset.go)})}
+</script></body></html>

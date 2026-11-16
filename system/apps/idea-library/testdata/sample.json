@@ -1,0 +1,42 @@
+{
+ "title": "Test sample",
+ "scope": "Test",
+ "defaults": {},
+ "unverified_shapes": [],
+ "sources": [
+  {
+   "id": "essay-tides",
+   "title": "Notes on Tides",
+   "kind": "Substack article",
+   "path": "tides.md",
+   "url": "https://example.com/p/notes-on-tides",
+   "raw": "Full saved text of Notes on Tides."
+  }
+ ],
+ "ideas": [
+  {
+   "id": "idea-1",
+   "title": "Patience with tides",
+   "angle": "Write about waiting well.",
+   "theme": "Patience",
+   "quote": "The tide comes back every evening.",
+   "source_id": "essay-tides",
+   "formats": [
+    "Substack note"
+   ],
+   "status": "new"
+  },
+  {
+   "id": "idea-2",
+   "title": "Evening returns",
+   "angle": "What comes back each evening.",
+   "theme": "Rhythm",
+   "quote": "Every evening it returns.",
+   "source_id": "essay-tides",
+   "formats": [
+    "Short video"
+   ],
+   "status": "new"
+  }
+ ]
+}
